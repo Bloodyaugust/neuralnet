@@ -1,0 +1,23 @@
+* {
+  font-family: 'Oswald', sans-serif;
+  @include font-size(14px);
+}
+
+h1 {
+  @include font-size(108px);
+}
+h2 {
+  @include font-size(22px);
+}
+h3 {
+  @include font-size(22px);
+}
+h4 {
+  @include font-size(18px);
+}
+h5 {
+  @include font-size(14px);
+}
+h6 {
+  @include font-size(12px);
+}

@@ -1,0 +1,27 @@
+{
+  "name": "nerualnet",
+  "description": "Fun exploration of neural networks in JS.",
+  "main": "index.js",
+  "authors": [
+    "Greyson Richey <greysonrichey@gmail.com> (http://synsugarstudio.com/)"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "tiny",
+    "spaces"
+  ],
+  "homepage": "synsugarstudio.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^2.2.3",
+    "mustache.js": "^2.2.1",
+    "fetch": "^1.0.0",
+    "es6-promise": "^3.2.1"
+  }
+}

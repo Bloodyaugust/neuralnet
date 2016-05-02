@@ -1,0 +1,29 @@
+body, html {
+  min-height: 100%;
+  min-width: 100%;
+}
+body {
+  background-color: white;
+  height: 100vh;
+  overflow-x: hidden;
+  text-align: center;
+  width: 100vw;
+}
+header {
+  margin: 0 auto;
+  z-index: 2;
+  @include vertical-align;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+  img {
+    margin-top: 50px;
+    max-height: 100px;
+    max-width: 100px;
+  }
+}
+
+.tiny-space {
+  position: absolute;
+}

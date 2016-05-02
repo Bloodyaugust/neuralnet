@@ -1,0 +1,37 @@
+body {
+  background-color: white;
+  color: white;
+  @include transition(background-color 1s ease);
+
+  &.loaded {
+    background-color: black;
+  }
+}
+header {
+  color: black;
+  visibility: hidden;
+  @include transition(color 1s ease);
+
+  img {
+    opacity: 0;
+    @include transition(opacity 1s ease);
+  }
+  &.show img {
+    opacity: 1;
+  }
+
+  &.show {
+    color: white;
+    visibility: visible;
+  }
+}
+
+.tiny-space {
+  opacity: 0;
+  -webkit-backface-visibility: hidden;
+  @include transition(opacity 1s ease);
+
+  &.show {
+    opacity: 1;
+  }
+}
