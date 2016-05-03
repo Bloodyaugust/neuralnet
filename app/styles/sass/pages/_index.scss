@@ -1,7 +1,10 @@
 canvas {
-  background-color: white;
+  height: 98vh;
+  margin: 0 auto;
   opacity: 0;
+  width: 98vw;
   @include transition(opacity 1s ease);
+  @include vertical-align();
 
   &.show {
     opacity: 1;
@@ -32,15 +35,5 @@ header {
   &.show {
     color: white;
     visibility: visible;
-  }
-}
-
-.tiny-space {
-  opacity: 0;
-  -webkit-backface-visibility: hidden;
-  @include transition(opacity 1s ease);
-
-  &.show {
-    opacity: 1;
   }
 }

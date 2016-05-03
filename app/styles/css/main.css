@@ -97,13 +97,20 @@ h6 {
     color: green; }
 
 canvas {
-  background-color: white;
+  height: 98vh;
+  margin: 0 auto;
   opacity: 0;
+  width: 98vw;
   -webkit-transition: opacity 1s ease;
   -moz-transition: opacity 1s ease;
   -ms-transition: opacity 1s ease;
   -o-transition: opacity 1s ease;
-  transition: opacity 1s ease; }
+  transition: opacity 1s ease;
+  position: relative;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%); }
   canvas.show {
     opacity: 1; }
 
@@ -138,16 +145,5 @@ header {
   header.show {
     color: white;
     visibility: visible; }
-
-.tiny-space {
-  opacity: 0;
-  -webkit-backface-visibility: hidden;
-  -webkit-transition: opacity 1s ease;
-  -moz-transition: opacity 1s ease;
-  -ms-transition: opacity 1s ease;
-  -o-transition: opacity 1s ease;
-  transition: opacity 1s ease; }
-  .tiny-space.show {
-    opacity: 1; }
 
 /*# sourceMappingURL=main.css.map */
