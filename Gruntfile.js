@@ -143,21 +143,21 @@ module.exports = function(grunt) {
         files: ['app/templates/**/*.html'],
         tasks: ['includeSource:dev', 'wiredep:dev', 'includeHTMLPartials:dev'],
         options: {
-          livereload: 1340
+          livereload: 35729
         }
       },
       javascript: {
         files: ['!app/**/*.test.js', 'app/**/*.js'],
         tasks: ['jshint'],
         options: {
-          livereload: 1340
+          livereload: 35729
         }
       },
       sass: {
         files: ['app/styles/**/*.scss'],
         tasks: ['sass:dev'],
         options: {
-          livereload: 1340
+          livereload: 35729
         }
       }
     },

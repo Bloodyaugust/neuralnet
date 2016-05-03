@@ -96,6 +96,17 @@ h6 {
   .valid input {
     color: green; }
 
+canvas {
+  background-color: white;
+  opacity: 0;
+  -webkit-transition: opacity 1s ease;
+  -moz-transition: opacity 1s ease;
+  -ms-transition: opacity 1s ease;
+  -o-transition: opacity 1s ease;
+  transition: opacity 1s ease; }
+  canvas.show {
+    opacity: 1; }
+
 body {
   background-color: white;
   color: white;
