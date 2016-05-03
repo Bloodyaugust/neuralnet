@@ -2,6 +2,7 @@ var compression = require('compression');
 var express = require('express');
 var fetch = require('node-fetch');
 var app = express();
+var fs = require('fs');
 
 var distMode = (process.argv[2] === 'dist');
 var port = process.env.PORT || 8085;
@@ -22,6 +23,16 @@ if (distMode) {
   app.use(express.static('app'));
 }
 app.use('/bower_components', express.static('bower_components'));
+
+app.get('/creature', function (req, res) {
+  fs.readFile('./best-creature.json', function (err, data) {
+    if (err) {
+      throw err;
+    }
+
+    res.send(data);
+  });
+});
 
 app.listen(port, function () {
   console.log('Listening on port ' + port + ' in ' + (distMode ? 'dist' : 'dev') + ' mode');

@@ -1,83 +1,32 @@
-$(function () {
-  var $canvas = $('canvas'),
-    stage = new PIXI.Container(),
-    graphics = new PIXI.Graphics(),
-    creatures, food, renderer, maxHeight, maxWidth, hive;
+var synaptic = require('synaptic');
+var fs = require('fs');
 
-  if ($canvas) {
-    maxHeight = $canvas.innerHeight();
-    maxWidth = $canvas.innerWidth();
-  } else {
-    maxHeight = 1000;
-    maxWidth = 1000;
-  }
+var maxHeight = 1000,
+  maxWidth = 1000,
+  hive = new HiveMind({heightBound: maxHeight, widthBound: maxWidth}),
+  creatures, food;
 
-  fetch('/creature')
-  .then(function (res) {
-    return res.json();
-  })
-  .then(function (json) {
-    hive = new HiveMind({
-      bestCreature: json,
-      heightBound: maxHeight,
-      widthBound: maxWidth
-    });
-
-    setInterval(function () {
-      hive.update(creatures, food);
-    }, 16);
-  });
-
-  creatures = [];
-  for (var i = 0; i < 10; i++) {
-    creatures.push(new Creature({
-      location: {
-        x: Math.random() * 105 + maxWidth / 2,
-        y: Math.random() * 105 + maxHeight / 2,
-      }
-    }));
-  }
-
-  food = [];
-  for (i = 0; i < 15; i++) {
-    food.push(new Food({
-      heightBound: maxHeight,
-      widthBound: maxWidth
-    }));
-  }
-
-  setTimeout(function () {
-    $('body').addClass('loaded');
-
-    setTimeout(function () {
-      $('header').addClass('show');
-      $('canvas').addClass('show');
-
-      renderer = new PIXI.autoDetectRenderer(maxWidth, maxHeight, {
-        antialias: true,
-        view: $canvas[0]
-      });
-      renderer.clearBeforeRender = true;
-
-      stage.addChild(graphics);
-
-      render();
-    }, 1000);
-  }, 500);
-
-  function render () {
-    graphics.clear();
-
-    hive.draw(graphics);
-    for (i = 0; i < food.length; i++) {
-      food[i].draw(graphics);
+creatures = [];
+for (var i = 0; i < 10; i++) {
+  creatures.push(new Creature({
+    location: {
+      x: Math.random() * 105 + maxWidth / 2,
+      y: Math.random() * 105 + maxHeight / 2,
     }
+  }));
+}
 
-    renderer.render(stage);
+food = [];
+for (i = 0; i < 15; i++) {
+  food.push(new Food({
+    heightBound: maxHeight,
+    widthBound: maxWidth
+  }));
+}
 
-    requestAnimationFrame(render);
-  }
-});
+setInterval(function () {
+  hive.update(creatures, food);
+}, 1);
 
 function Creature (config) {
   var me = this;
@@ -86,7 +35,6 @@ function Creature (config) {
   me.heightBound = config.heightBound || 100;
   me.perceptron = config.perceptron;
   me.heading = 0;
-  me.lastHeading = 0;
   me.location = {
     x: config.location.x || 0,
     y: config.location.y || 0
@@ -94,11 +42,6 @@ function Creature (config) {
   me.score = 0;
   me.speed = 5;
 
-  me.draw = function (gfx) {
-    gfx.beginFill(0xFF0000, 1);
-    gfx.drawCircle(me.location.x, me.location.y, 5);
-    gfx.endFill();
-  };
   me.update = function (food) {
     var closestFood = food[0],
       distance = Math.sqrt(Math.pow(food[0].location.x - me.location.x, 2) + Math.pow(food[0].location.y - me.location.y, 2)),
@@ -133,12 +76,7 @@ function Creature (config) {
       closestFood.location.y / me.heightBound
     ])[0];
 
-    me.lastHeading = me.heading;
     me.heading = (Math.PI * 2) * newHeading;
-
-    if (me.lastHeading === me.heading) {
-      console.log('persisted heading: ' + me.heading);
-    }
 
     if (distance < 50) {
       me.score++;
@@ -161,11 +99,6 @@ function Food (config) {
     y: 0
   };
 
-  me.draw = function (gfx) {
-    gfx.beginFill(0x00FF00, 1);
-    gfx.drawCircle(me.location.x, me.location.y, 5);
-    gfx.endFill();
-  };
   me.relocate = function () {
     me.location.x = Math.random() * me.widthBound;
     me.location.y = Math.random() * me.heightBound;
@@ -186,7 +119,7 @@ function HiveMind (config) {
   me.generationTTL = config.generationTTL || 1000;
   me.mutationRate = config.mutationRate || 0.01;
   me.numCreatures = config.numCreatures || 10;
-  me.numNewCreaturesGeneration = config.numNewCreaturesGeneration || 5;
+  me.numNewCreaturesGeneration = config.numNewCreaturesGeneration || 2;
   me.perceptronBlueprint = config.perceptronBlueprint || [2, 20, 1];
 
   for (var i = 0; i < me.numCreatures; i++) {
@@ -201,13 +134,9 @@ function HiveMind (config) {
     }));
   }
 
-  me.draw = function (gfx) {
-    for (i = 0; i < me.creatures.length; i++) {
-      me.creatures[i].draw(gfx);
-    }
-  };
   me.update = function (creatures, food) {
-    var newPerceptron;
+    var oldBest = me.bestCreature.score || 0,
+      newPerceptron;
 
     me.currentTick++;
 
@@ -268,6 +197,16 @@ function HiveMind (config) {
       }
 
       me.currentGenerationTTL = me.generationTTL;
+
+      if (me.bestCreature.score !== oldBest) {
+        fs.writeFile("./best-creature.json", JSON.stringify(me.bestCreature.perceptron.toJSON()), function(err) {
+          if(err) {
+              return console.log(err);
+          }
+
+          console.log("Best perceptron saved.");
+        });
+      }
     }
   };
 }

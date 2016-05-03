@@ -139,6 +139,13 @@ module.exports = function(grunt) {
       }
     },
     watch: {
+      creature: {
+        files: ['best-creature.json'],
+        tasks: [],
+        options: {
+          livereload: 35729
+        }
+      },
       html: {
         files: ['app/templates/**/*.html'],
         tasks: ['includeSource:dev', 'wiredep:dev', 'includeHTMLPartials:dev'],
