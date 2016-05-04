@@ -2,7 +2,7 @@ $(function () {
   var $canvas = $('canvas'),
     stage = new PIXI.Container(),
     graphics = new PIXI.Graphics(),
-    creatures, creature, food, renderer, maxHeight, maxWidth, hive;
+    creature, food, renderer, maxHeight, maxWidth, hive;
 
   if ($canvas) {
     maxHeight = $canvas.innerHeight();
@@ -15,36 +15,16 @@ $(function () {
   creature = new Creature({
     heightBound: maxHeight,
     widthBound: maxWidth,
-    perceptron: new synaptic.Architect.Perceptron(4, 20, 1),
-    location: {x: 100, y: 100}
-  });
-
-  fetch('/creature')
-  .then(function (res) {
-    return res.json();
-  })
-  .then(function (json) {
-    hive = new HiveMind({
-      bestCreature: json,
-      heightBound: maxHeight,
-      widthBound: maxWidth
-    });
-
-    setInterval(function () {
-      //hive.update(creatures, food);
-      creature.update(food);
-    }, 16);
-  });
-
-  creatures = [];
-  for (var i = 0; i < 10; i++) {
-    creatures.push(new Creature({
-      location: {
-        x: Math.random() * 105 + maxWidth / 2,
-        y: Math.random() * 105 + maxHeight / 2,
+    location: {x: 100, y: 100},
+    agent: new RL.DQNAgent({
+      getNumStates: function () {
+        return 4;
+      },
+      getMaxNumActions: function () {
+        return 4;
       }
-    }));
-  }
+    }, {alpha: 0.01})
+  });
 
   food = [];
   for (i = 0; i < 15; i++) {
@@ -70,13 +50,16 @@ $(function () {
       stage.addChild(graphics);
 
       render();
+
+      setInterval(function () {
+        creature.update(food);
+      }, 16);
     }, 1000);
   }, 500);
 
   function render () {
     graphics.clear();
 
-    //hive.draw(graphics);
     for (i = 0; i < food.length; i++) {
       food[i].draw(graphics);
     }
@@ -93,7 +76,7 @@ function Creature (config) {
 
   me.widthBound = config.widthBound || 100;
   me.heightBound = config.heightBound || 100;
-  me.perceptron = config.perceptron;
+  me.agent = config.agent;
   me.heading = 0;
   me.lastHeading = 0;
   me.location = {
@@ -137,15 +120,15 @@ function Creature (config) {
       }
     }
 
-    newHeading = me.perceptron.activate([
+    newHeading = me.agent.act([
       me.location.x / me.widthBound,
       me.location.y / me.heightBound,
       closestFood.location.x / me.widthBound,
       closestFood.location.y / me.heightBound
-    ])[0];
+    ]);
 
     me.lastHeading = me.heading;
-    me.heading = (Math.PI * 2) * newHeading;
+    me.heading = ((Math.PI * 2) / 4) * newHeading;
 
     if (me.lastHeading === me.heading) {
       console.log('persisted heading: ' + me.heading);
@@ -153,22 +136,16 @@ function Creature (config) {
 
     if (distance < 50) {
       me.score++;
+      me.agent.learn((distance / 50) * -0.1 + 0.1);
     }
 
     if (distance < 10) {
       closestFood.relocate();
       me.score += 100;
+      me.agent.learn(1);
 
       console.log('Food get! Score is: ' + me.score);
     }
-
-    wantedHeading = Math.atan2(closestFood.location.y - me.location.y, closestFood.location.x - me.location.x);
-    if (wantedHeading < 0) {
-      wantedHeading += Math.PI * 2;
-    }
-    wantedHeading /= Math.PI * 2;
-
-    me.perceptron.propagate(0.3, [wantedHeading]);
   };
 }
 
