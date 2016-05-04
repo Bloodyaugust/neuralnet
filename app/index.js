@@ -2,7 +2,7 @@ $(function () {
   var $canvas = $('canvas'),
     stage = new PIXI.Container(),
     graphics = new PIXI.Graphics(),
-    creatures, food, renderer, maxHeight, maxWidth, hive;
+    creatures, creature, food, renderer, maxHeight, maxWidth, hive;
 
   if ($canvas) {
     maxHeight = $canvas.innerHeight();
@@ -11,6 +11,13 @@ $(function () {
     maxHeight = 1000;
     maxWidth = 1000;
   }
+
+  creature = new Creature({
+    heightBound: maxHeight,
+    widthBound: maxWidth,
+    perceptron: new synaptic.Architect.Perceptron(4, 20, 1),
+    location: {x: 100, y: 100}
+  });
 
   fetch('/creature')
   .then(function (res) {
@@ -24,7 +31,8 @@ $(function () {
     });
 
     setInterval(function () {
-      hive.update(creatures, food);
+      //hive.update(creatures, food);
+      creature.update(food);
     }, 16);
   });
 
@@ -68,10 +76,11 @@ $(function () {
   function render () {
     graphics.clear();
 
-    hive.draw(graphics);
+    //hive.draw(graphics);
     for (i = 0; i < food.length; i++) {
       food[i].draw(graphics);
     }
+    creature.draw(graphics);
 
     renderer.render(stage);
 
@@ -102,7 +111,7 @@ function Creature (config) {
   me.update = function (food) {
     var closestFood = food[0],
       distance = Math.sqrt(Math.pow(food[0].location.x - me.location.x, 2) + Math.pow(food[0].location.y - me.location.y, 2)),
-      newHeading;
+      newHeading, wantedHeading;
 
     me.location.x += me.speed * Math.cos(me.heading);
     me.location.y += me.speed * Math.sin(me.heading);
@@ -129,6 +138,8 @@ function Creature (config) {
     }
 
     newHeading = me.perceptron.activate([
+      me.location.x / me.widthBound,
+      me.location.y / me.heightBound,
       closestFood.location.x / me.widthBound,
       closestFood.location.y / me.heightBound
     ])[0];
@@ -147,7 +158,17 @@ function Creature (config) {
     if (distance < 10) {
       closestFood.relocate();
       me.score += 100;
+
+      console.log('Food get! Score is: ' + me.score);
     }
+
+    wantedHeading = Math.atan2(closestFood.location.y - me.location.y, closestFood.location.x - me.location.x);
+    if (wantedHeading < 0) {
+      wantedHeading += Math.PI * 2;
+    }
+    wantedHeading /= Math.PI * 2;
+
+    me.perceptron.propagate(0.3, [wantedHeading]);
   };
 }
 

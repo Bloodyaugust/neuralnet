@@ -3,18 +3,13 @@ var fs = require('fs');
 
 var maxHeight = 1000,
   maxWidth = 1000,
-  hive = new HiveMind({heightBound: maxHeight, widthBound: maxWidth}),
-  creatures, food;
-
-creatures = [];
-for (var i = 0; i < 10; i++) {
-  creatures.push(new Creature({
-    location: {
-      x: Math.random() * 105 + maxWidth / 2,
-      y: Math.random() * 105 + maxHeight / 2,
-    }
-  }));
-}
+  creature = new Creature({
+    heightBound: maxHeight,
+    widthBound: maxWidth,
+    perceptron: new synaptic.Architect.Perceptron(4, 20, 1),
+    location: {x: 0, y: 0}
+  }),
+  food;
 
 food = [];
 for (i = 0; i < 15; i++) {
@@ -25,7 +20,7 @@ for (i = 0; i < 15; i++) {
 }
 
 setInterval(function () {
-  hive.update(creatures, food);
+  creature.update(food);
 }, 1);
 
 function Creature (config) {
@@ -45,7 +40,7 @@ function Creature (config) {
   me.update = function (food) {
     var closestFood = food[0],
       distance = Math.sqrt(Math.pow(food[0].location.x - me.location.x, 2) + Math.pow(food[0].location.y - me.location.y, 2)),
-      newHeading;
+      newHeading, wantedHeading;
 
     me.location.x += me.speed * Math.cos(me.heading);
     me.location.y += me.speed * Math.sin(me.heading);
@@ -72,6 +67,8 @@ function Creature (config) {
     }
 
     newHeading = me.perceptron.activate([
+      me.location.x / me.widthBound,
+      me.location.y / me.heightBound,
       closestFood.location.x / me.widthBound,
       closestFood.location.y / me.heightBound
     ])[0];
@@ -85,7 +82,17 @@ function Creature (config) {
     if (distance < 10) {
       closestFood.relocate();
       me.score += 100;
+
+      console.log('Food get! Score is: ' + me.score);
     }
+
+    wantedHeading = Math.atan2(closestFood.location.y - me.location.y, closestFood.location.x - me.location.x);
+    if (wantedHeading < 0) {
+      wantedHeading += Math.PI * 2;
+    }
+    wantedHeading /= Math.PI * 2;
+
+    me.perceptron.propagate(0.3, [wantedHeading]);
   };
 }
 
