@@ -189,13 +189,37 @@ function HiveMind (config) {
   me.numNewCreaturesGeneration = config.numNewCreaturesGeneration || 5;
   me.perceptronBlueprint = config.perceptronBlueprint || [2, 20, 1];
 
-  for (var i = 0; i < me.numCreatures; i++) {
+  for (var i = 0; i < me.numNewCreaturesGeneration; i++) {
     me.creatures.push(new Creature({
       location: {
         x: Math.random() * me.widthBound,
         y: Math.random() * me.heightBound
       },
       perceptron: new synaptic.Architect.Perceptron(me.perceptronBlueprint[0], me.perceptronBlueprint[1], me.perceptronBlueprint[2]),
+      heightBound: me.heightBound,
+      widthBound: me.widthBound
+    }));
+  }
+  for (i = me.numNewCreaturesGeneration; i < me.numCreatures; i++) {
+    newPerceptron = me.bestCreature;
+
+    for (var i2 = 0; i2 < newPerceptron.connections.length; i2++) {
+      if (Math.random() < me.mutationRate) {
+        newPerceptron.connections[i2].weight = 0.1 - Math.random() * 0.2;
+      }
+    }
+    for (i2 = 0; i2 < newPerceptron.neurons.length; i2++) {
+      if (Math.random() < me.mutationRate) {
+        newPerceptron.neurons[i2].bias = 0.1 - Math.random() * 0.2;
+      }
+    }
+
+    me.creatures.push(new Creature({
+      location: {
+        x: Math.random() * me.widthBound,
+        y: Math.random() * me.heightBound
+      },
+      perceptron: new synaptic.Network.fromJSON(me.bestCreature),
       heightBound: me.heightBound,
       widthBound: me.widthBound
     }));
